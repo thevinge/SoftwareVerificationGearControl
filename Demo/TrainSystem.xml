@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>// Place global declarations here.
+const int N = 4;
+chan appr[N], stop[N], start[N], leave[N];
+urgent chan go[N];
+typedef int[0,N-1] id_t;
+</declaration><template><name>Train</name><parameter>const id_t id</parameter><declaration>clock x;</declaration><location id="id0" x="-408" y="-384"><name x="-418" y="-414">Start</name><label kind="invariant" x="-392" y="-400">x &lt;= 15</label></location><location id="id1" x="-408" y="-200"><name x="-392" y="-216">Cross</name><label kind="invariant" x="-392" y="-200">x &lt;= 5</label></location><location id="id2" x="-544" y="-384"><name x="-554" y="-414">Stop</name></location><location id="id3" x="-624" y="-272"><name x="-640" y="-304">Appr</name><label kind="invariant" x="-640" y="-264">x&lt;=20</label></location><location id="id4" x="-736" y="-272"><name x="-746" y="-302">Safe</name></location><init ref="id4"/><transition><source ref="id1"/><target ref="id4"/><label kind="guard" x="-592" y="-176">x &gt;= 3</label><label kind="synchronisation" x="-600" y="-192">leave[id]!</label><nail x="-408" y="-152"/><nail x="-736" y="-152"/></transition><transition><source ref="id3"/><target ref="id1"/><label kind="guard" x="-528" y="-272">x&gt;=10</label><label kind="assignment" x="-520" y="-256">x:=0</label></transition><transition><source ref="id0"/><target ref="id1"/><label kind="guard" x="-392" y="-320">x &gt;= 7</label><label kind="assignment" x="-392" y="-304">x:=0</label></transition><transition><source ref="id2"/><target ref="id0"/><label kind="synchronisation" x="-504" y="-408">go[id]?</label><label kind="assignment" x="-496" y="-384">x:=0</label></transition><transition><source ref="id3"/><target ref="id2"/><label kind="guard" x="-616" y="-376">x&lt;=10</label><label kind="synchronisation" x="-632" y="-360">stop[id]?</label></transition><transition><source ref="id4"/><target ref="id3"/><label kind="synchronisation" x="-712" y="-304">appr[id]!</label><label kind="assignment" x="-704" y="-272">x:=0</label></transition></template><template><name>Gate</name><declaration>id_t list[N+1];
+int[0,N] len;
+
+// Put an element at the end of the queue
+void enqueue(id_t element)
+{
+        list[len++] = element;
+}
+
+// Remove the front element of the queue
+void dequeue()
+{
+        int i = 0;
+        len -= 1;
+        while (i &lt; len)
+        {
+                list[i] = list[i + 1];
+                i++;
+        }
+        list[i] = 0;
+}
+
+// Returns the front element of the queue
+id_t front()
+{
+   return list[0];
+}
+
+// Returns the last element of the queue
+id_t tail()
+{
+   return list[len - 1];
+}</declaration><location id="id5" x="0" y="56"><name x="-16" y="64">add1</name><committed/></location><location id="id6" x="0" y="-24"><name x="16" y="-16">Occ</name></location><location id="id7" x="0" y="-144"><name x="-16" y="-176">Free</name></location><init ref="id7"/><transition><source ref="id5"/><target ref="id6"/><label kind="synchronisation" x="32" y="8">stop[tail()]!</label><nail x="32" y="16"/></transition><transition><source ref="id6"/><target ref="id5"/><label kind="select" x="-64" y="-16">e : id_t</label><label kind="synchronisation" x="-64" y="0">appr[e]?</label><label kind="assignment" x="-80" y="16">enqueue(e)</label></transition><transition><source ref="id7"/><target ref="id6"/><label kind="guard" x="-80" y="-112">len &gt; 0</label><label kind="synchronisation" x="-80" y="-96">go[front()]!</label><nail x="-88" y="-144"/><nail x="-88" y="-24"/></transition><transition><source ref="id6"/><target ref="id7"/><label kind="select" x="128" y="-126">e : id_t</label><label kind="guard" x="128" y="-111">e == front()</label><label kind="synchronisation" x="128" y="-96">leave[e]?</label><label kind="assignment" x="128" y="-81">dequeue()</label><nail x="112" y="-24"/><nail x="112" y="-144"/></transition><transition><source ref="id7"/><target ref="id6"/><label kind="select" x="16" y="-136">e : id_t</label><label kind="guard" x="16" y="-120">len == 0</label><label kind="synchronisation" x="16" y="-104">appr[e]?</label><label kind="assignment" x="16" y="-88">enqueue(e)</label></transition></template><system>system Train, Gate;</system></nta>
